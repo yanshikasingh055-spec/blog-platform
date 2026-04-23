@@ -1,65 +1,119 @@
-import Image from "next/image";
+'use client'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default function Home() {
+  const [posts, setPosts] = useState([])
+  const [search, setSearch] = useState('')
+  const [user, setUser] = useState(null)
+  const [userRole, setUserRole] = useState(null)
+  const [page, setPage] = useState(1)
+  const postsPerPage = 6
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUser(user)
+        const { data: profile } = await supabase
+          .from('users').select('role').eq('id', user.id).single()
+        if (profile) setUserRole(profile.role)
+      }
+    }
+    getUser()
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
+    const { data } = await supabase
+      .from('posts')
+      .select('id, title, summary, image_url, created_at, author_id')
+      .order('created_at', { ascending: false })
+    if (data) setPosts(data)
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setUserRole(null)
+  }
+
+  const filtered = posts.filter(p =>
+    p.title.toLowerCase().includes(search.toLowerCase())
+  )
+  const paginated = filtered.slice((page - 1) * postsPerPage, page * postsPerPage)
+  const totalPages = Math.ceil(filtered.length / postsPerPage)
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-gray-900">📝 Blog Platform</h1>
+        <div className="flex gap-4 items-center">
+          {user ? (
+            <>
+              <span className="text-sm text-gray-600">Role: <strong>{userRole}</strong></span>
+              {(userRole === 'author') && (
+                <Link href="/posts/create" className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">+ New Post</Link>
+              )}
+              <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">Logout</button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm text-blue-600 hover:underline">Login</Link>
+              <Link href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">Sign Up</Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+      {/* Search */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <input
+          className="w-full border p-3 rounded-lg mb-8 text-gray-900"
+          placeholder="Search posts..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        {/* Posts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginated.map(post => (
+            <Link key={post.id} href={`/posts/${post.id}`}>
+              <div className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer overflow-hidden">
+                {post.image_url && (
+                  <img src={post.image_url} alt={post.title} className="w-full h-40 object-cover" />
+                )}
+                <div className="p-4">
+                  <h2 className="font-bold text-gray-900 text-lg mb-2">{post.title}</h2>
+                  <p className="text-gray-500 text-sm line-clamp-3">{post.summary || 'No summary available.'}</p>
+                  <p className="text-xs text-gray-400 mt-3">{new Date(post.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-4 py-2 rounded ${page === i + 1 ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {paginated.length === 0 && (
+          <p className="text-center text-gray-500 mt-12">No posts found.</p>
+        )}
+      </div>
     </div>
-  );
+  )
 }
