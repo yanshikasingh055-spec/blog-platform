@@ -1,8 +1,9 @@
-# Blog Platform
+ Blog Platform
 
 A full-stack blogging platform built with Next.js and Supabase.
 
-## Live Demo
+ Live Demo
+ https://blog-platform-pi-wine.vercel.app
 
 
 ## GitHub Repository
