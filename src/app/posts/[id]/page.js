@@ -88,10 +88,20 @@ export default function PostDetail() {
 
         {/* AI Summary Box */}
         {post.summary && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-xs font-bold text-blue-600 mb-1">🤖 AI Summary</p>
-            <p className="text-sm text-blue-800">{post.summary}</p>
+          <div style={{
+            background: 'linear-gradient(135deg, #fef9f0, #fdf3e3)',
+            border: '1px solid var(--accent)',
+            borderLeft: '4px solid var(--accent)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginBottom: '2rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1rem' }}>✨</span>
+            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>AI Generated Summary</p>
           </div>
+          <p style={{ color: '#7c5a2a', fontSize: '0.95rem', lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>{post.summary}</p>
+         </div>
         )}
 
         <div className="prose text-gray-800 leading-relaxed mb-10 whitespace-pre-wrap">{post.body}</div>

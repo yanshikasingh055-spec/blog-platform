@@ -15,87 +15,76 @@ export default function SignUp() {
   const handleSignUp = async () => {
     setError('')
     setLoading(true)
-
-    // Log role to confirm it's correct
     console.log('Signing up with role:', role)
 
-    const { data, error: signUpError } = await supabase.auth.signUp({ 
-      email, 
-      password 
-    })
-    
-    if (signUpError) { 
-      setError(signUpError.message)
-      setLoading(false)
-      return 
-    }
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    if (signUpError) { setError(signUpError.message); setLoading(false); return }
 
     const { error: profileError } = await supabase
-      .from('users')
-      .insert({ 
-        id: data.user.id, 
-        name, 
-        email, 
-        role  // this will now correctly save selected role
-      })
-
-    if (profileError) { 
-      setError(profileError.message)
-      setLoading(false)
-      return 
-    }
+      .from('users').insert({ id: data.user.id, name, email, role })
+    if (profileError) { setError(profileError.message); setLoading(false); return }
 
     setLoading(false)
     router.push('/login')
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded shadow w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Create Account</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <input 
-          className="w-full border p-2 rounded mb-3 text-gray-900" 
-          placeholder="Full Name" 
-          value={name} 
-          onChange={e => setName(e.target.value)} 
-        />
-        <input 
-          className="w-full border p-2 rounded mb-3 text-gray-900" 
-          placeholder="Email" 
-          type="email" 
-          value={email} 
-          onChange={e => setEmail(e.target.value)} 
-        />
-        <input 
-          className="w-full border p-2 rounded mb-3 text-gray-900" 
-          placeholder="Password (min 6 chars)" 
-          type="password" 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-        />
-        <label className="block text-sm text-gray-600 mb-1">Select Role</label>
-        <select 
-          className="w-full border p-2 rounded mb-4 text-gray-900" 
-          value={role} 
-          onChange={e => {
-            console.log('Role selected:', e.target.value)
-            setRole(e.target.value)
-          }}
-        >
-          <option value="viewer">Viewer</option>
-          <option value="author">Author</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button 
-          onClick={handleSignUp} 
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </button>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Already have an account? <a href="/login" className="text-blue-600">Login</a>
+    <div style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        <div className="text-center mb-8">
+          <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '0.5rem' }}>
+            Join us
+          </h1>
+          <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>Create your account to get started</p>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid var(--border)', padding: '2.5rem', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          {error && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.5rem', color: '#dc2626', fontSize: '0.875rem' }}>
+              {error}
+            </div>
+          )}
+
+          {[
+            { label: 'Full Name', value: name, setter: setName, type: 'text', placeholder: 'Yanshika Singh' },
+            { label: 'Email', value: email, setter: setEmail, type: 'email', placeholder: 'you@example.com' },
+            { label: 'Password', value: password, setter: setPassword, type: 'password', placeholder: '••••••••' },
+          ].map(({ label, value, setter, type, placeholder }) => (
+            <div key={label} style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--ink)', marginBottom: '0.5rem' }}>{label}</label>
+              <input
+                type={type}
+                placeholder={placeholder}
+                value={value}
+                onChange={e => setter(e.target.value)}
+                style={{ width: '100%', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.95rem', outline: 'none' }}
+              />
+            </div>
+          ))}
+
+          <div style={{ marginBottom: '2rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, color: 'var(--ink)', marginBottom: '0.5rem' }}>Role</label>
+            <select
+              value={role}
+              onChange={e => { console.log('Role:', e.target.value); setRole(e.target.value) }}
+              style={{ width: '100%', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.95rem', outline: 'none', background: 'white' }}>
+              <option value="viewer">Viewer — Read & comment on posts</option>
+              <option value="author">Author — Create & manage posts</option>
+              <option value="admin">Admin — Manage all content</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleSignUp}
+            disabled={loading}
+            style={{ width: '100%', background: 'var(--ink)', color: 'white', border: 'none', borderRadius: '8px', padding: '0.85rem', fontSize: '0.95rem', fontWeight: 500, cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'Creating account...' : 'Create Account'}
+          </button>
+        </div>
+
+        <p className="text-center mt-6" style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
+          Already have an account?{' '}
+          <a href="/login" style={{ color: 'var(--accent)', fontWeight: 500 }}>Sign in</a>
         </p>
       </div>
     </div>
