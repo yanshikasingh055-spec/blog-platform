@@ -40,15 +40,28 @@ export default function PostDetail() {
 
   const handleComment = async () => {
     if (!newComment.trim()) return
-    const { error } = await supabase.from('comments').insert({
-      post_id: id, user_id: user.id, comment_text: newComment
+    if (!user) { alert('Please login to comment'); return }
+    
+    console.log('Commenting as user:', user.id)
+    console.log('Comment text:', newComment)
+    
+    const { data, error } = await supabase.from('comments').insert({
+      post_id: id,
+      user_id: user.id,
+      comment_text: newComment.trim()
     })
-    if (!error) {
-      setNewComment('')
-      const { data } = await supabase
-        .from('comments').select('*, users(name)').eq('post_id', id).order('created_at', { ascending: true })
-      setComments(data || [])
+    
+    console.log('Comment result:', data, error)
+    
+    if (error) {
+      alert('Error: ' + error.message)
+      return
     }
+    
+    setNewComment('')
+    const { data: commentsData } = await supabase
+      .from('comments').select('*, users(name)').eq('post_id', id).order('created_at', { ascending: true })
+    setComments(commentsData || [])
   }
 
   const handleDelete = async () => {

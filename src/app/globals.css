@@ -30,3 +30,22 @@ input, select, textarea {
 input::placeholder, textarea::placeholder {
   color: #9ca3af !important;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  nav {
+    padding: 0.75rem 1rem !important;
+  }
+
+  nav a span, nav > a {
+    font-size: 1.2rem !important;
+  }
+
+  nav div span {
+    display: none;
+  }
+
+  h1 {
+    font-size: 2.5rem !important;
+  }
+}
