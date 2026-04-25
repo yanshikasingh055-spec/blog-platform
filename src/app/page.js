@@ -98,6 +98,21 @@ export default function Home() {
                   + New Post
                 </Link>
               )}
+              {userRole === 'admin' && (
+               <Link href="/admin" style={{
+                 background: 'var(--ink)',
+                 color: 'white',
+                 padding: '0.5rem 1.25rem',
+                 borderRadius: '2rem',
+                 fontSize: '0.85rem',
+                 fontWeight: 500,
+                 textDecoration: 'none'
+               }}>
+                  Dashboard
+               </Link>
+              )}
+
+
               <button onClick={handleLogout} style={{
                 color: 'var(--muted)',
                 fontSize: '0.85rem',
