@@ -16,14 +16,44 @@ export default function SignUp() {
     setError('')
     setLoading(true)
     console.log('Signing up with role:', role)
-
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
-    if (signUpError) { setError(signUpError.message); setLoading(false); return }
-
+  
+    // Step 1 — Create auth user
+    const { data, error: signUpError } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: { name, role } // store role in auth metadata too
+      }
+    })
+    
+    if (signUpError) { 
+      setError(signUpError.message)
+      setLoading(false)
+      return 
+    }
+  
+    if (!data.user) {
+      setError('Signup failed, please try again')
+      setLoading(false)
+      return
+    }
+  
+    // Step 2 — Insert profile with correct role
     const { error: profileError } = await supabase
-      .from('users').insert({ id: data.user.id, name, email, role })
-    if (profileError) { setError(profileError.message); setLoading(false); return }
-
+      .from('users')
+      .upsert({ 
+        id: data.user.id, 
+        name, 
+        email, 
+        role  // this saves the selected role
+      }, { onConflict: 'id' }) // if exists, update it
+  
+    if (profileError) { 
+      setError(profileError.message)
+      setLoading(false)
+      return 
+    }
+  
     setLoading(false)
     router.push('/login')
   }
@@ -46,7 +76,7 @@ export default function SignUp() {
           )}
 
           {[
-            { label: 'Full Name', value: name, setter: setName, type: 'text', placeholder: 'Yanshika Singh' },
+            { label: 'Full Name', value: name, setter: setName, type: 'text', placeholder: 'name' },
             { label: 'Email', value: email, setter: setEmail, type: 'email', placeholder: 'you@example.com' },
             { label: 'Password', value: password, setter: setPassword, type: 'password', placeholder: '••••••••' },
           ].map(({ label, value, setter, type, placeholder }) => (

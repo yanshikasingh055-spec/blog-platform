@@ -79,17 +79,81 @@ export default function PostDetail() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <button onClick={() => router.push('/')} className="text-blue-600 hover:underline text-sm">← Back to Home</button>
-        <div className="flex gap-3">
-          {(userRole === 'admin' || user?.id === post.author_id) && (
-            <>
-              <button onClick={() => router.push(`/posts/edit/${id}`)} className="bg-yellow-500 text-white px-4 py-2 rounded text-sm hover:bg-yellow-600">Edit</button>
-              <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600">Delete</button>
-            </>
-          )}
-        </div>
-      </nav>
+      <nav style={{
+  borderBottom: '1px solid var(--border)',
+  background: 'rgba(250,248,245,0.95)',
+  padding: '1rem 2.5rem',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  position: 'sticky',
+  top: 0,
+  zIndex: 50
+}}>
+  <button onClick={() => router.push('/')} style={{
+    color: 'var(--muted)',
+    fontSize: '0.875rem',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer'
+  }}>
+    ← Back to Home
+  </button>
+
+  <a href="/" style={{
+    fontFamily: 'Playfair Display, serif',
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    color: 'var(--ink)',
+    textDecoration: 'none'
+  }}>
+    The <span style={{ color: 'var(--accent)' }}>Blog</span>
+  </a>
+
+  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+    {user && (
+      <span style={{
+        color: 'var(--accent)',
+        fontSize: '0.8rem',
+        fontWeight: 600,
+        background: 'var(--accent-light)',
+        padding: '0.3rem 0.85rem',
+        borderRadius: '2rem',
+        textTransform: 'capitalize'
+      }}>
+        {userRole}
+      </span>
+    )}
+    {(userRole === 'admin' || user?.id === post?.author_id) && (
+      <>
+        <button onClick={() => router.push(`/posts/edit/${id}`)} style={{
+          background: '#f59e0b',
+          color: 'white',
+          border: 'none',
+          padding: '0.5rem 1.25rem',
+          borderRadius: '2rem',
+          fontSize: '0.85rem',
+          cursor: 'pointer',
+          fontWeight: 500
+        }}>
+          Edit
+        </button>
+        <button onClick={handleDelete} style={{
+          background: '#ef4444',
+          color: 'white',
+          border: 'none',
+          padding: '0.5rem 1.25rem',
+          borderRadius: '2rem',
+          fontSize: '0.85rem',
+          cursor: 'pointer',
+          fontWeight: 500
+        }}>
+          Delete
+        </button>
+      </>
+    )}
+  </div>
+</nav>
 
       <div className="max-w-3xl mx-auto px-4 py-10">
         {post.image_url && (
